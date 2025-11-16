@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Мини‑лайтбокс: создаём overlay с крестиком, центрируем контент
+// Мини-лайтбокс: создаём overlay с крестиком, центрируем контент
 (function () {
   const galleryCards = Array.from(document.querySelectorAll(".gallery-card"));
   if (!galleryCards.length) return;
@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let overlay = null;
   let currentIndex = 0;
   let imgEl = null;
+  let isAnimating = false; // флаг для предотвращения множественных переключений
 
   function openAt(index) {
     currentIndex = index;
@@ -84,52 +85,89 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     document.addEventListener("keydown", onKey);
 
-    // swipe / drag
-    let startX = null;
-    let pointerId = null;
-    let moved = false;
+    // swipe / drag - упрощённая версия
+    let touchStartX = null;
+    let touchStartY = null;
 
-    overlay.addEventListener("pointerdown", (e) => {
-      startX = e.clientX;
-      pointerId = e.pointerId;
-      moved = false;
-      overlay.setPointerCapture(pointerId);
-      imgEl.style.transition = ""; // отключаем transition на время перетаскивания
-    });
+    imgEl.addEventListener(
+      "touchstart",
+      (e) => {
+        if (isAnimating) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      },
+      { passive: true }
+    );
 
-    overlay.addEventListener("pointermove", (e) => {
-      if (startX === null) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 2) moved = true;
-      imgEl.style.transform = `translateX(${dx}px)`;
-    });
+    imgEl.addEventListener(
+      "touchend",
+      (e) => {
+        if (touchStartX === null || isAnimating) return;
 
-    overlay.addEventListener("pointerup", (e) => {
-      if (startX === null) return;
-      overlay.releasePointerCapture(pointerId);
-      const dx = e.clientX - startX;
-      imgEl.style.transition = "transform 0.22s ease";
-      if (Math.abs(dx) > 60) {
-        if (dx < 0) showNext();
-        else showPrev();
-      } else {
-        imgEl.style.transform = ""; // вернуться в центр
-      }
-      startX = null;
-      pointerId = null;
-    });
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const dx = touchEndX - touchStartX;
+        const dy = touchEndY - touchStartY;
+
+        // Проверяем что это горизонтальный свайп
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+          if (dx < 0) {
+            // Свайп влево - следующее фото
+            showNext();
+          } else {
+            // Свайп вправо - предыдущее фото
+            showPrev();
+          }
+        }
+
+        touchStartX = null;
+        touchStartY = null;
+      },
+      { passive: true }
+    );
 
     // загрузка первого изображения и предзагрузка соседей
-    loadIndex(currentIndex);
+    loadIndex(currentIndex, 0); // 0 = без анимации при открытии
   }
 
-  function loadIndex(index) {
+  function loadIndex(index, direction) {
     if (!imgEl) return;
 
-    // Определяем направление (для анимации)
-    const direction = index > currentIndex ? 1 : -1;
+    // Если direction не передан, вычисляем его
+    if (direction === undefined) {
+      direction = index > currentIndex ? 1 : index < currentIndex ? -1 : 0;
+    }
+
+    isAnimating = true;
+
+    // Если это первая загрузка (direction = 0), просто показываем без анимации
+    if (direction === 0) {
+      imgEl.style.transition = "opacity 0.3s ease";
+      imgEl.style.opacity = "0";
+
+      const src = items[index].full || items[index].thumb || svgPlaceholder;
+      const pre = new Image();
+
+      pre.onload = () => {
+        imgEl.src = pre.src;
+        imgEl.alt = items[index].alt;
+        imgEl.style.opacity = "1";
+        isAnimating = false;
+        preloadNeighbors(index);
+      };
+
+      pre.onerror = () => {
+        imgEl.src = items[index].thumb || svgPlaceholder;
+        imgEl.style.opacity = "1";
+        isAnimating = false;
+      };
+
+      pre.src = src;
+      return;
+    }
 
     // Анимация выхода старого изображения
+    imgEl.style.transition = "opacity 0.35s ease, transform 0.35s ease";
     imgEl.style.opacity = "0";
     imgEl.style.transform = `translateX(${-30 * direction}px)`;
 
@@ -149,6 +187,11 @@ document.addEventListener("DOMContentLoaded", function () {
         requestAnimationFrame(() => {
           imgEl.style.opacity = "1";
           imgEl.style.transform = "translateX(0)";
+
+          // Снимаем блокировку после завершения анимации
+          setTimeout(() => {
+            isAnimating = false;
+          }, 350);
         });
 
         preloadNeighbors(index);
@@ -160,6 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
         imgEl.src = items[index].thumb || svgPlaceholder;
         imgEl.style.opacity = "1";
         imgEl.style.transform = "translateX(0)";
+        isAnimating = false;
       }, 150);
     };
 
@@ -179,12 +223,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showNext() {
-    currentIndex = (currentIndex + 1) % items.length;
-    loadIndex(currentIndex);
+    if (isAnimating) return;
+    const newIndex = (currentIndex + 1) % items.length;
+    loadIndex(newIndex, 1); // 1 = вправо
+    currentIndex = newIndex;
   }
+
   function showPrev() {
-    currentIndex = (currentIndex - 1 + items.length) % items.length;
-    loadIndex(currentIndex);
+    if (isAnimating) return;
+    const newIndex = (currentIndex - 1 + items.length) % items.length;
+    loadIndex(newIndex, -1); // -1 = влево
+    currentIndex = newIndex;
   }
 
   function onKey(e) {
@@ -198,6 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
     overlay.remove();
     overlay = null;
     imgEl = null;
+    isAnimating = false;
     document.body.style.overflow = "";
     document.removeEventListener("keydown", onKey);
   }
