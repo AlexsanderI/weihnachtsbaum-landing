@@ -301,7 +301,7 @@ section {
   display: block;
   border-radius: 10px;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); /* тёмная мягкая тень для контраста */
-  transition: opacity 0.25s ease, transform 0.22s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 /* Кнопка закрытия (крестик) */

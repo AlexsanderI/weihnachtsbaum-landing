@@ -125,20 +125,44 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function loadIndex(index) {
     if (!imgEl) return;
+
+    // Определяем направление (для анимации)
+    const direction = index > currentIndex ? 1 : -1;
+
+    // Анимация выхода старого изображения
     imgEl.style.opacity = "0";
-    imgEl.style.transform = "";
+    imgEl.style.transform = `translateX(${-30 * direction}px)`;
+
     const src = items[index].full || items[index].thumb || svgPlaceholder;
     const pre = new Image();
+
     pre.onload = () => {
-      imgEl.src = pre.src;
-      imgEl.alt = items[index].alt;
-      imgEl.style.opacity = "1";
-      preloadNeighbors(index);
+      // Небольшая задержка для плавности
+      setTimeout(() => {
+        imgEl.src = pre.src;
+        imgEl.alt = items[index].alt;
+
+        // Начинаем с противоположной стороны
+        imgEl.style.transform = `translateX(${30 * direction}px)`;
+
+        // Анимация входа нового изображения
+        requestAnimationFrame(() => {
+          imgEl.style.opacity = "1";
+          imgEl.style.transform = "translateX(0)";
+        });
+
+        preloadNeighbors(index);
+      }, 150);
     };
+
     pre.onerror = () => {
-      imgEl.src = items[index].thumb || svgPlaceholder;
-      imgEl.style.opacity = "1";
+      setTimeout(() => {
+        imgEl.src = items[index].thumb || svgPlaceholder;
+        imgEl.style.opacity = "1";
+        imgEl.style.transform = "translateX(0)";
+      }, 150);
     };
+
     pre.src = src;
   }
 
