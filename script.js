@@ -27,85 +27,159 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Мини‑лайтбокс: создаём overlay с крестиком, центрируем контент
 (function () {
-  const galleryCards = document.querySelectorAll(".gallery-card");
+  const galleryCards = Array.from(document.querySelectorAll(".gallery-card"));
   if (!galleryCards.length) return;
 
-  function createOverlay(imgSrc, alt) {
-    const overlay = document.createElement("div");
+  const items = galleryCards.map((btn) => {
+    const img = btn.querySelector("img");
+    return {
+      full: btn.dataset.full || (img && img.src) || svgPlaceholder,
+      thumb: img && img.src,
+      alt: (img && img.alt) || "Foto",
+    };
+  });
+
+  let overlay = null;
+  let currentIndex = 0;
+  let imgEl = null;
+
+  function openAt(index) {
+    currentIndex = index;
+    overlay = document.createElement("div");
     overlay.className = "ltb-overlay";
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
-
-    // используем прозрачный .ltb-wrap и добавляем кнопку закрытия
     overlay.innerHTML = `
-      <div class="ltb-wrap" aria-label="${alt}">
+      <div class="ltb-wrap" aria-label="${items[index].alt}">
         <button class="ltb-close" aria-label="Schließen" title="Schließen">
-          <!-- простой SVG крестик -->
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <img src="${imgSrc}" alt="${alt}" class="ltb-img" />
+        <button class="ltb-nav ltb-prev" aria-label="Vorheriges" title="Vorheriges">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <img src="${svgPlaceholder}" alt="${items[index].alt}" class="ltb-img" />
+
+        <button class="ltb-nav ltb-next" aria-label="Nächstes" title="Nächstes">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
     `;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = "hidden";
 
-    // закрываем при клике по фону (overlay), но не при клике по картинке/крестику
+    imgEl = overlay.querySelector(".ltb-img");
+    const closeBtn = overlay.querySelector(".ltb-close");
+    const prevBtn = overlay.querySelector(".ltb-prev");
+    const nextBtn = overlay.querySelector(".ltb-next");
+
+    // обработчики
+    closeBtn.addEventListener("click", closeOverlay);
+    prevBtn.addEventListener("click", showPrev);
+    nextBtn.addEventListener("click", showNext);
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeOverlay(overlay);
+      if (e.target === overlay) closeOverlay();
+    });
+    document.addEventListener("keydown", onKey);
+
+    // swipe / drag
+    let startX = null;
+    let pointerId = null;
+    let moved = false;
+
+    overlay.addEventListener("pointerdown", (e) => {
+      startX = e.clientX;
+      pointerId = e.pointerId;
+      moved = false;
+      overlay.setPointerCapture(pointerId);
+      imgEl.style.transition = ""; // отключаем transition на время перетаскивания
     });
 
-    // кнопка закрытия
-    const closeBtn = overlay.querySelector(".ltb-close");
-    closeBtn.addEventListener("click", () => closeOverlay(overlay));
+    overlay.addEventListener("pointermove", (e) => {
+      if (startX === null) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 2) moved = true;
+      imgEl.style.transform = `translateX(${dx}px)`;
+    });
 
-    return overlay;
+    overlay.addEventListener("pointerup", (e) => {
+      if (startX === null) return;
+      overlay.releasePointerCapture(pointerId);
+      const dx = e.clientX - startX;
+      imgEl.style.transition = "transform 0.22s ease";
+      if (Math.abs(dx) > 60) {
+        if (dx < 0) showNext();
+        else showPrev();
+      } else {
+        imgEl.style.transform = ""; // вернуться в центр
+      }
+      startX = null;
+      pointerId = null;
+    });
+
+    // загрузка первого изображения и предзагрузка соседей
+    loadIndex(currentIndex);
   }
 
-  function openLightboxWithPreload(src, fallbackSrc, alt) {
+  function loadIndex(index) {
+    if (!imgEl) return;
+    imgEl.style.opacity = "0";
+    imgEl.style.transform = "";
+    const src = items[index].full || items[index].thumb || svgPlaceholder;
     const pre = new Image();
     pre.onload = () => {
-      const overlay = createOverlay(pre.src, alt);
-      document.body.appendChild(overlay);
-      document.body.style.overflow = "hidden";
-      document.addEventListener("keydown", escClose);
+      imgEl.src = pre.src;
+      imgEl.alt = items[index].alt;
+      imgEl.style.opacity = "1";
+      preloadNeighbors(index);
     };
     pre.onerror = () => {
-      // если не загрузился полный src — используем fallback или placeholder
-      const altSrc = fallbackSrc || svgPlaceholder;
-      const overlay = createOverlay(altSrc, alt);
-      document.body.appendChild(overlay);
-      document.body.style.overflow = "hidden";
-      document.addEventListener("keydown", escClose);
+      imgEl.src = items[index].thumb || svgPlaceholder;
+      imgEl.style.opacity = "1";
     };
-    // если src пустой, прямо вызываем onerror через присвоение placeholder
-    pre.src = src || svgPlaceholder;
+    pre.src = src;
   }
 
-  function escClose(e) {
-    if (e.key === "Escape") {
-      const overlay = document.querySelector(".ltb-overlay");
-      if (overlay) closeOverlay(overlay);
-    }
+  function preloadNeighbors(index) {
+    if (items.length < 2) return;
+    const next = (index + 1) % items.length;
+    const prev = (index - 1 + items.length) % items.length;
+    [items[next].full, items[prev].full].forEach((s) => {
+      if (s) {
+        const p = new Image();
+        p.src = s;
+      }
+    });
   }
 
-  function closeOverlay(overlay) {
+  function showNext() {
+    currentIndex = (currentIndex + 1) % items.length;
+    loadIndex(currentIndex);
+  }
+  function showPrev() {
+    currentIndex = (currentIndex - 1 + items.length) % items.length;
+    loadIndex(currentIndex);
+  }
+
+  function onKey(e) {
+    if (e.key === "Escape") closeOverlay();
+    if (e.key === "ArrowRight") showNext();
+    if (e.key === "ArrowLeft") showPrev();
+  }
+
+  function closeOverlay() {
     if (!overlay) return;
     overlay.remove();
+    overlay = null;
+    imgEl = null;
     document.body.style.overflow = "";
-    document.removeEventListener("keydown", escClose);
+    document.removeEventListener("keydown", onKey);
   }
 
-  galleryCards.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const imgEl = btn.querySelector("img");
-      const full = btn.dataset.full || (imgEl && imgEl.src);
-      const thumb = imgEl && imgEl.src;
-      const alt = (imgEl && imgEl.alt) || "Foto";
-      openLightboxWithPreload(
-        full || thumb || svgPlaceholder,
-        thumb || svgPlaceholder,
-        alt
-      );
-    });
+  // открытие по клику на карточку
+  galleryCards.forEach((btn, i) => {
+    btn.addEventListener("click", () => openAt(i));
   });
 })();
