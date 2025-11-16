@@ -120,19 +120,176 @@ section {
 
 /* Галерея */
 
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
+/* Gallery Styling */
+/* Gallery Styling – Enhanced */
+#galerie {
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
 }
 
-.gallery-item {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 0.75rem;
+#galerie h2 {
+  color: #145a32;
+  font-size: 1.8rem;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.5rem;
 }
+
+:root {
+  --brand-green: #145a32;
+  --accent-green: #1e8449;
+  --card-bg: #ffffff;
+  --gap: 1.5rem;
+}
+
+/* Галерея: 3 колонки на десктопе, 2 на планшете, 1 на телефоне */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap);
+  margin-top: 2rem;
+  align-items: start;
+}
+
+/* Карточка-фото */
+.gallery-card {
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: 0 4px 14px rgba(20, 90, 50, 0.06);
+  border: 1px solid rgba(20, 90, 50, 0.04);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  cursor: zoom-in;
+  aspect-ratio: 4 / 3; /* постоянное соотношение для аккуратности */
+  display: block;
+  position: relative;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none; /* сбрасываем стандартный border кнопки */
+  background-clip: padding-box;
+}
+
+/* Показать placeholder фон до загрузки и при ошибке */
+.gallery-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdf9 100%);
+  min-height: 180px; /* на случай, если изображения отсутствуют */
+}
+
+/* изначально img невидим, появится при load / error через JS */
+.gallery-item {
+  opacity: 0;
+  transition: opacity 0.45s ease, transform 0.28s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  background-color: #f1f3f2; /* нейтральный фон пока нет картинки */
+}
+
+/* hover — мягкое масштабирование + тень + тон */
+.gallery-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 36px rgba(20, 90, 50, 0.12);
+}
+.gallery-card:hover::after {
+  opacity: 1;
+}
+.gallery-card:hover .gallery-item {
+  transform: scale(1.03);
+}
+
+/* адаптив */
+@media (max-width: 992px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .gallery {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .gallery-card {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Лайтбокс — центрация и крестик для закрытия */
+.ltb-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 10, 0.65);
+  padding: 2rem;
+  z-index: 1000;
+}
+
+.ltb-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 1100px;
+  width: 100%;
+  /* делаем фон прозрачным, чтобы не было «белой рамки» */
+  background: transparent;
+  border-radius: 12px;
+  overflow: visible; /* чтобы крестик не обрезался */
+}
+
+/* само изображение — центрируется, сохраняет пропорции, без белой рамки слева */
+.ltb-img {
+  max-width: 100%;
+  max-height: calc(100vh - 4rem);
+  object-fit: contain;
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); /* тёмная мягкая тень для контраста */
+}
+
+/* Кнопка закрытия (крестик) */
+.ltb-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--brand-green);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  z-index: 1010;
+}
+.ltb-close:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+}
+.ltb-close:focus {
+  outline: 2px solid rgba(20, 90, 50, 0.12);
+  outline-offset: 2px;
+}
+
+/* На мобильных уменьшаем размеры крестика и отступы */
+@media (max-width: 600px) {
+  .ltb-close {
+    width: 36px;
+    height: 36px;
+    top: -8px;
+    right: -8px;
+  }
+  .ltb-overlay {
+    padding: 1rem;
+  }
+}
+
 /* Форма */
 
 .contact-form {

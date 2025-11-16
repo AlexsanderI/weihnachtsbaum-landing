@@ -70,22 +70,49 @@
 
       <section id="galerie">
         <h2>Impressionen vom Hof</h2>
-        <div class="gallery">
-          <img
-            src="images/tree1.jpg"
-            alt="Weihnachtsbaum 1"
-            class="gallery-item"
-          />
-          <img
-            src="images/tree2.jpg"
-            alt="Weihnachtsbaum 2"
-            class="gallery-item"
-          />
-          <img
-            src="images/tree3.jpg"
-            alt="Weihnachtsbaum 3"
-            class="gallery-item"
-          />
+        <div class="gallery" role="list">
+          <button
+            class="gallery-card"
+            type="button"
+            data-full="images/tree1-large.jpg"
+            aria-label="Weihnachtsbaum auf dem Hof 1"
+          >
+            <img
+              src="images/tree1.jpg"
+              alt="Weihnachtsbaum auf dem Hof 1"
+              class="gallery-item"
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
+          <button
+            class="gallery-card"
+            type="button"
+            data-full="images/tree2-large.jpg"
+            aria-label="Weihnachtsbaum auf dem Hof 2"
+          >
+            <img
+              src="images/tree2.jpg"
+              alt="Weihnachtsbaum auf dem Hof 2"
+              class="gallery-item"
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
+          <button
+            class="gallery-card"
+            type="button"
+            data-full="images/tree3-large.jpg"
+            aria-label="Weihnachtsbaum auf dem Hof 3"
+          >
+            <img
+              src="images/tree3.jpg"
+              alt="Weihnachtsbaum auf dem Hof 3"
+              class="gallery-item"
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
         </div>
       </section>
 
@@ -165,5 +192,7 @@
     <footer>
       <p>© 2025 Weihnachtsbaumhof Muster. Alle Rechte vorbehalten.</p>
     </footer>
+
+    <script src="script.js"></script>
   </body>
 </html>
