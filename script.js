@@ -85,16 +85,47 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     document.addEventListener("keydown", onKey);
 
-    // swipe / drag - упрощённая версия
-    let touchStartX = null;
-    let touchStartY = null;
+    // swipe / drag - универсальная версия для touch и mouse
+    let startX = null;
+    let startY = null;
+    let isDragging = false;
 
+    // Функция начала касания/клика
+    function handleStart(x, y) {
+      if (isAnimating) return;
+      startX = x;
+      startY = y;
+      isDragging = false;
+    }
+
+    // Функция окончания касания/клика
+    function handleEnd(x, y) {
+      if (startX === null || isAnimating) return;
+
+      const dx = x - startX;
+      const dy = y - startY;
+
+      // Проверяем что это горизонтальный свайп
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+        if (dx < 0) {
+          // Свайп влево - следующее фото
+          showNext();
+        } else {
+          // Свайп вправо - предыдущее фото
+          showPrev();
+        }
+      }
+
+      startX = null;
+      startY = null;
+      isDragging = false;
+    }
+
+    // Touch events для мобильных
     imgEl.addEventListener(
       "touchstart",
       (e) => {
-        if (isAnimating) return;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+        handleStart(e.touches[0].clientX, e.touches[0].clientY);
       },
       { passive: true }
     );
@@ -102,29 +133,28 @@ document.addEventListener("DOMContentLoaded", function () {
     imgEl.addEventListener(
       "touchend",
       (e) => {
-        if (touchStartX === null || isAnimating) return;
-
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-        const dx = touchEndX - touchStartX;
-        const dy = touchEndY - touchStartY;
-
-        // Проверяем что это горизонтальный свайп
-        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-          if (dx < 0) {
-            // Свайп влево - следующее фото
-            showNext();
-          } else {
-            // Свайп вправо - предыдущее фото
-            showPrev();
-          }
-        }
-
-        touchStartX = null;
-        touchStartY = null;
+        handleEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
       },
       { passive: true }
     );
+
+    // Mouse events для десктопа (как запасной вариант)
+    imgEl.addEventListener("mousedown", (e) => {
+      handleStart(e.clientX, e.clientY);
+      isDragging = true;
+    });
+
+    imgEl.addEventListener("mouseup", (e) => {
+      if (isDragging) {
+        handleEnd(e.clientX, e.clientY);
+      }
+    });
+
+    imgEl.addEventListener("mouseleave", () => {
+      startX = null;
+      startY = null;
+      isDragging = false;
+    });
 
     // загрузка первого изображения и предзагрузка соседей
     loadIndex(currentIndex, 0); // 0 = без анимации при открытии
