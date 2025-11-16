@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weihnachtsbäume direkt vom Hof</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Frische Weihnachtsbäume direkt vom Hof</h1>
+      <p>Nachhaltig angebaut – selbst schneiden oder bequem liefern lassen.</p>
+      <div class="hero-buttons">
+        <a href="#kontakt" class="btn primary">Jetzt Baum reservieren</a>
+        <a href="tel:+49123456789" class="btn secondary">Anrufen</a>
+      </div>
+    </header>
+
+    <main>
+      <section id="vorteile">
+        <h2>Warum bei uns?</h2>
+        <ul>
+          <li>Familienbetrieb aus der Region</li>
+          <li>Nachhaltig angebaute Weihnachtsbäume</li>
+          <li>Selbst schneiden oder fertig vorbereitet</li>
+          <li>Auf Wunsch Lieferung im Umkreis</li>
+        </ul>
+      </section>
+
+      <section id="preise">
+        <h2>Preise</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Höhe des Baumes</th>
+              <th>Preis ab</th>
+              <th>Hinweis</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1,0–1,2 m</td>
+              <td>20–25 €</td>
+              <td>kompakt</td>
+            </tr>
+            <tr>
+              <td>1,5–1,7 m</td>
+              <td>30–35 €</td>
+              <td>beliebt</td>
+            </tr>
+            <tr>
+              <td>2,0–2,2 m</td>
+              <td>45–55 €</td>
+              <td>sehr dicht</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="ablauf">
+        <h2>So funktioniert es</h2>
+        <ol>
+          <li>Sie kommen zu unserem Hof und suchen Ihren Baum aus.</li>
+          <li>Selbst schneiden oder von uns schneiden lassen.</li>
+          <li>Wir netzen den Baum ein und verladen ihn.</li>
+          <li>Sie nehmen ihn mit oder wir liefern im Umkreis.</li>
+        </ol>
+      </section>
+
+      <section id="galerie">
+        <h2>Impressionen vom Hof</h2>
+        <div class="gallery">
+          <div class="gallery-item">Foto 1 (Platzhalter)</div>
+          <div class="gallery-item">Foto 2 (Platzhalter)</div>
+          <div class="gallery-item">Foto 3 (Platzhalter)</div>
+        </div>
+      </section>
+
+      <section id="anfahrt">
+        <h2>Anfahrt</h2>
+        <p>Adresse: Musterweg 12, 37627 Deensen</p>
+        <p>Hier kommt später die eingebettete Google Maps Karte.</p>
+      </section>
+
+      <section id="kontakt">
+        <h2>Kontakt & Reservierung</h2>
+        <p>📞 Telefon: <a href="tel:+49123456789">+49 123 456 789</a></p>
+        <p>
+          💬 WhatsApp:
+          <a href="https://wa.me/49123456789" target="_blank"
+            >Nachricht schreiben</a
+          >
+        </p>
+
+        <form class="contact-form">
+          <label>
+            Name
+            <input type="text" name="name" required />
+          </label>
+
+          <label>
+            Telefon oder E-Mail
+            <input type="text" name="kontakt" required />
+          </label>
+
+          <label>
+            Gewünschte Höhe
+            <select name="hoehe">
+              <option value="1-1.2">1,0–1,2 m</option>
+              <option value="1.5-1.7">1,5–1,7 m</option>
+              <option value="2-2.2">2,0–2,2 m</option>
+            </select>
+          </label>
+
+          <label>
+            Datum der Abholung / Lieferung
+            <input type="date" name="datum" />
+          </label>
+
+          <label>
+            Kommentar
+            <textarea name="kommentar" rows="4"></textarea>
+          </label>
+
+          <button type="submit" class="btn primary">Anfrage senden</button>
+        </form>
+      </section>
+
+      <section id="faq">
+        <h2>Häufige Fragen</h2>
+        <div class="faq-item">
+          <h3>Muss ich einen Termin vereinbaren?</h3>
+          <p>
+            Für Selbstabholer ohne Lieferung ist kein Termin nötig. Für
+            Lieferung bitten wir um kurze Reservierung.
+          </p>
+        </div>
+        <div class="faq-item">
+          <h3>Kann ich mit Karte bezahlen?</h3>
+          <p>
+            Information je nach Möglichkeit – z.B. Barzahlung und Kartenzahlung
+            möglich.
+          </p>
+        </div>
+        <div class="faq-item">
+          <h3>Liefern Sie auch nach [Nachbarort]?</h3>
+          <p>Ja, im Umkreis von X km gegen eine kleine Lieferpauschale.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2025 Weihnachtsbaumhof Muster. Alle Rechte vorbehalten.</p>
+    </footer>
+  </body>
+</html>
