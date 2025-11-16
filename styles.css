@@ -29,6 +29,12 @@ main {
   padding: 1.5rem;
 }
 
+@media (max-width: 600px) {
+  main {
+    padding: 0.75rem;
+  }
+}
+
 /* Hero */
 
 .hero {
@@ -83,6 +89,13 @@ section {
   border-radius: 0.75rem;
 }
 
+@media (max-width: 600px) {
+  section {
+    padding: 1rem;
+    margin-top: 0.75rem;
+  }
+}
+
 /* Vorteile */
 
 #vorteile ul {
@@ -121,7 +134,7 @@ section {
 /* Галерея */
 
 /* Gallery Styling */
-/* Gallery Styling – Enhanced */
+/* Gallery Styling — Enhanced */
 #galerie {
   background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
 }
@@ -208,9 +221,17 @@ section {
   .gallery {
     grid-template-columns: 1fr;
     gap: 1rem;
+    margin-left: 0;
+    margin-right: 0;
   }
   .gallery-card {
     aspect-ratio: 16 / 9;
+    width: 100%;
+    max-width: 100%;
+  }
+  .gallery-item {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -313,25 +334,33 @@ section {
 
 /* На мобильных уменьшаем размеры крестика и отступы */
 @media (max-width: 600px) {
+  .ltb-overlay {
+    padding: 0.5rem;
+  }
+
+  .ltb-wrap {
+    padding: 0 2.5rem; /* Добавляем пространство для кнопок */
+  }
+
   .ltb-prev,
   .ltb-next {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
+
   .ltb-prev {
-    left: 6px;
+    left: 0.25rem;
   }
+
   .ltb-next {
-    right: 6px;
+    right: 0.25rem;
   }
+
   .ltb-close {
     width: 36px;
     height: 36px;
-    top: -8px;
-    right: -8px;
-  }
-  .ltb-overlay {
-    padding: 1rem;
+    top: 0.25rem;
+    right: 0.25rem;
   }
 }
 
